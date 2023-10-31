@@ -4108,6 +4108,11 @@ class nusoap_server extends nusoap_base
         $try_class = '';
         if (strlen($delim) > 0 && substr_count($this->methodname, $delim) == 1) {
             $try_class = substr($this->methodname, 0, strpos($this->methodname, $delim));
+
+	    // MODIFIED BY GABOR 2016-08-24
+            $try_class = 'App\Controller\\' . $try_class;
+            // ~~~~~~~~~~
+		
             if (class_exists($try_class)) {
                 // get the class and method name
                 $class = $try_class;
@@ -4125,8 +4130,13 @@ class nusoap_server extends nusoap_base
         }
 
         // does method exist?
+
+	// MODIFIED BY GABOR 2016-08-24
+        $this->methodname1 = 'app\controller\\' . $this->methodname;
+        // ~~~~~~~~~~
+	    
         if ($class == '') {
-            if (!function_exists($this->methodname)) {
+            if (!function_exists($this->methodname1)) {
                 $this->debug("in invoke_method, function '$this->methodname' not found!");
                 $this->result = 'fault: method not found';
                 $this->fault('SOAP-ENV:Client', "method '$this->methodname'('$orig_methodname') not defined in service('$try_class' '$delim')");
@@ -8709,4 +8719,12 @@ class nusoap_wsdlcache {
  * For backward compatibility
  */
 class wsdlcache extends nusoap_wsdlcache {
+}
+
+if (!extension_loaded('soap')) {
+    /**
+     *	For backwards compatiblity, define soapclient unless the PHP SOAP extension is loaded.
+     */
+    class soapclient extends nusoap_client {
+    }
 }
